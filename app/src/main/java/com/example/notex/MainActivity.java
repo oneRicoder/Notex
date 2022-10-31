@@ -2,6 +2,7 @@ package com.example.notex;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,7 +20,9 @@ import com.example.notex.Models.Notes;
 import com.example.notex.Models.NotesClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     List<Notes> notes;
     RoomDB database;
     FloatingActionButton fab_add;
+    SearchView searchView_home;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recycler_home);
         fab_add = findViewById(R.id.fab_add);
+        searchView_home = findViewById(R.id.searchView_home);
 
         database = RoomDB.getInstance(this);
         notes = database.mainDao().getAll();
@@ -50,6 +55,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        searchView_home.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filter(newText);
+                return false;
+            }
+        });
+
+    }
+
+    private void filter(String newText) {
+        List<Notes> filtered_list = new ArrayList<>();
+        for (Notes singleNote : notes){
+            if (singleNote.getTitle().toLowerCase().contains(newText.toLowerCase())
+                    || singleNote.getNote().toLowerCase().contains(newText.toLowerCase())){
+                filtered_list.add(singleNote);
+            }
+        }
+        notesLIstAdapter.filterList(filtered_list);
     }
 
     @Override
@@ -60,6 +89,15 @@ public class MainActivity extends AppCompatActivity {
                 assert data != null;
                 Notes new_note = (Notes) data.getSerializableExtra("note");
                 database.mainDao().insert(new_note);
+                notes.clear();
+                notes.addAll(database.mainDao().getAll());
+                notesLIstAdapter.notifyDataSetChanged();
+            }
+        }else if (requestCode == 102){
+            if (resultCode == Activity.RESULT_OK){
+                assert data != null;
+                Notes new_note = (Notes) data.getSerializableExtra("note");
+                database.mainDao().update(new_note.getID(), new_note.getTitle(), new_note.getNote());
                 notes.clear();
                 notes.addAll(database.mainDao().getAll());
                 notesLIstAdapter.notifyDataSetChanged();
@@ -77,7 +115,9 @@ public class MainActivity extends AppCompatActivity {
     private final NotesClickListener notesClickListener = new NotesClickListener() {
         @Override
         public void onClick(Notes notes) {
-
+            Intent intent = new Intent(MainActivity.this, NotesTakerActivity.class);
+            intent.putExtra("old_notes", notes);
+            startActivityForResult(intent, 102);
         }
 
         @Override
