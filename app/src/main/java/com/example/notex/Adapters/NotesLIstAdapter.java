@@ -1,6 +1,8 @@
 package com.example.notex.Adapters;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -11,28 +13,66 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notex.Models.Notes;
+import com.example.notex.Models.NotesClickListener;
 import com.example.notex.R;
 
 import java.util.List;
+import java.util.Random;
 
 public class NotesLIstAdapter extends RecyclerView.Adapter<NotesViewHolder> {
     Context context;
     List<Notes> list;
+    NotesClickListener listener;
+
+    public NotesLIstAdapter(Context context, List<Notes> list, NotesClickListener listener) {
+        this.context = context;
+        this.list = list;
+        this.listener = listener;
+    }
 
     @NonNull
     @Override
     public NotesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return null;
+        return new NotesViewHolder(LayoutInflater.from(context).inflate(R.layout.notes_list, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull NotesViewHolder holder, int position) {
+        holder.textView_title.setText(list.get(position).getTitle());
+        holder.textView_title.setSelected(true);
 
+        holder.textview_notes.setText(list.get(position).getNote());
+        holder.textview_date.setText(list.get(position).getDate());
+        holder.textview_date.setSelected(true);
+
+        if (list.get(position).getPinned()){
+            holder.imageView_pin.setImageResource(R.drawable.ic_pin);
+        }else {
+            holder.imageView_pin.setImageResource(0);
+        }
+        Random random = new Random();
+        String color = String.format("#%06x", random.nextInt(256*256*256));
+        holder.notes_container.setCardBackgroundColor(Color.parseColor(color));
+
+        holder.notes_container.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onClick(list.get(holder.getAdapterPosition()));
+            }
+        });
+
+        holder.notes_container.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                listener.onLongClick(list.get(holder.getAdapterPosition()), holder.notes_container);
+                return true;
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return list.size();
     }
 }
 
