@@ -11,8 +11,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 
 import com.example.notex.Adapters.NotesLIstAdapter;
 import com.example.notex.Models.Database.RoomDB;
@@ -24,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener{
 
     RecyclerView recyclerView;
     NotesLIstAdapter notesLIstAdapter;
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     RoomDB database;
     FloatingActionButton fab_add;
     SearchView searchView_home;
+    Notes selectedNote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +125,39 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onLongClick(Notes notes, CardView cardView) {
-
+            selectedNote = new Notes();
+            selectedNote = notes;
+            showPopUP(cardView);
         }
     };
+
+    private void showPopUP(CardView cardView) {
+        PopupMenu popupMenu = new PopupMenu(this, cardView);
+        popupMenu.setOnMenuItemClickListener(this);
+        popupMenu.inflate(R.menu.pop_menu);
+        popupMenu.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.delete:
+                database.mainDao().delete(selectedNote);
+                notes.clear();
+                notes.addAll(database.mainDao().getAll());
+                notesLIstAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.pin:
+                if (selectedNote.getPinned()){
+                    database.mainDao().pin(selectedNote.getID(), false);
+                }else {
+                    database.mainDao().pin(selectedNote.getID(), true);
+                }
+                notes.clear();
+                notes.addAll(database.mainDao().getAll());
+                notesLIstAdapter.notifyDataSetChanged();
+                return true;
+        }
+        return false;
+    }
 }

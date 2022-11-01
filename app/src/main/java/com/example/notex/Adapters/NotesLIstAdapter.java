@@ -16,6 +16,7 @@ import com.example.notex.Models.Notes;
 import com.example.notex.Models.NotesClickListener;
 import com.example.notex.R;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -52,7 +53,7 @@ public class NotesLIstAdapter extends RecyclerView.Adapter<NotesViewHolder> {
         }
         Random random = new Random();
         String color = String.format("#%06x", random.nextInt(256*256*256));
-        holder.notes_container.setCardBackgroundColor(Color.parseColor(color));
+        holder.notes_container.setCardBackgroundColor(holder.itemView.getResources().getColor(getColor()));
 
         holder.notes_container.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,6 +69,19 @@ public class NotesLIstAdapter extends RecyclerView.Adapter<NotesViewHolder> {
                 return true;
             }
         });
+    }
+    public int getColor(){
+        List<Integer> colorList = new ArrayList<>();
+        colorList.add(R.color.color1);
+        colorList.add(R.color.color2);
+        colorList.add(R.color.color3);
+        colorList.add(R.color.color4);
+        colorList.add(R.color.color5);
+        colorList.add(R.color.color6);
+        colorList.add(R.color.color7);
+        colorList.add(R.color.color8);
+        Random rand = new Random();
+        return colorList.get(rand.nextInt(colorList.size()));
     }
 
     @Override

@@ -49,7 +49,7 @@ public class NotesTakerActivity extends AppCompatActivity {
                     Toast.makeText(NotesTakerActivity.this, "Please Enter a Note!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                SimpleDateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm a");
+                SimpleDateFormat formatter = new SimpleDateFormat("EEE, d MMM HH:mm a");
                 Date date = new Date();
 
                 if (!notecheck){
